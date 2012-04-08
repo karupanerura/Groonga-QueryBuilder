@@ -58,7 +58,7 @@ sub _build {
                     croak("unknown cond = ref($cond_rule)");
                 }
                 my $rule = $cond_rule_hash->{$cond_rule};
-                my $val  = escape_value($cond->{$cond_rule});
+                my $val  = _escape_value($cond->{$cond_rule});
                 $query = "${column}${rule}${val}";
                 last;
             }
@@ -68,14 +68,14 @@ sub _build {
         }
     }
     else {
-        $cond  = escape_value($cond);
+        $cond  = _escape_value($cond);
         $query = "${column}:${cond}";
     }
 
     return $query;
 }
 
-sub escape_value {
+sub _escape_value {
     state $rule = Data::Validator->new(
         val  => 'Str',
     )->with(qw/StrictSequenced/);
@@ -112,9 +112,9 @@ This document describes Groonga::QueryBuilder version 0.01.
 
 =head1 INTERFACE
 
-=head2 Functions
+=head2 Methods
 
-=head3 C<< hello() >>
+=head3 C<< build >>
 
 # TODO
 
