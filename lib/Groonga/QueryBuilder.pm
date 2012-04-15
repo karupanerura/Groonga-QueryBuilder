@@ -83,7 +83,7 @@ sub _escape_value {
         val  => 'Str',
     )->with(qw/StrictSequenced/);
     my $val = $rule->validate(@_)->{val};
-    $val =~ s/"/\\"/g;
+    $val =~ s/(?<!\\)"/\\"/g;
     return qq{"${val}"};
 }
 
