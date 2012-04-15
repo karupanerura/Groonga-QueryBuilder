@@ -14,8 +14,11 @@ sub build {
     my $args  = (@_ == 1 and ref($_[0]) eq 'HASH') ? +shift : +{ @_ };
 
     my @queries;
-    foreach my $key (sort keys %$args) {
-        push @queries => $class->_build($key => $args->{$key});
+    {
+        local $Carp::CarpLevel = $Carp::CarpLevel + 1;
+        foreach my $key (sort keys %$args) {
+            push @queries => $class->_build($key => $args->{$key});
+        }
     }
 
     return join(' + ', @queries);
