@@ -4,7 +4,7 @@ use Test::More;
 
 use Groonga::QueryBuilder;
 
-like+Groonga::QueryBuilder->_escape_value('ho" fuga:@"hoge"'),  qr/^"(?:[^"]|\\")+"$/, 'escape ok';
+like+Groonga::QueryBuilder->escape_value('ho" fuga:@"hoge"'),  qr/^"(?:[^"]|\\")+"$/, 'escape ok';
 
 is+Groonga::QueryBuilder->build(
     bar => 'ho" fuga:@"hoge"',

@@ -4,12 +4,15 @@ use strict;
 use warnings;
 use utf8;
 
+use Carp;
+
 our $VERSION = '0.01';
 
 sub build {
     my $class = shift;
     my $args  = (@_ == 1 and ref($_[0]) and ref($_[0]) eq 'HASH') ? +shift : +{ @_ };
 
+    local $Carp::CarpLevel = $Carp::CarpLevel + 1;
     my @queries;
     foreach my $key (sort keys %$args) {
         push @queries => $class->_build($key => $args->{$key});
@@ -29,6 +32,7 @@ sub _build {
                 shift(@vals):
                 'OR';
 
+            local $Carp::CarpLevel = $Carp::CarpLevel + 1;
             foreach my $val (@vals) {
                 $query .= " $join " if $query;
                 $query .= $class->_build($column => $val);
@@ -49,7 +53,7 @@ sub _build {
                     croak("unknown cond = ref($cond_rule)");
                 }
                 my $rule = $cond_rule_hash->{$cond_rule};
-                my $val  = $class->_escape_value($cond->{$cond_rule});
+                my $val  = $class->escape_value($cond->{$cond_rule});
                 $query = "${column}${rule}${val}";
                 last;
             }
@@ -59,14 +63,14 @@ sub _build {
         }
     }
     else {
-        $cond  = $class->_escape_value($cond);
+        $cond  = $class->escape_value($cond);
         $query = "${column}:${cond}";
     }
 
     return $query;
 }
 
-sub _escape_value {
+sub escape_value {
     my($class, $val) = @_;
 
     $val =~ s/(?<!\\)"/\\"/g;
