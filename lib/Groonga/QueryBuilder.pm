@@ -6,33 +6,21 @@ use utf8;
 
 our $VERSION = '0.01';
 
-use Carp;
-use Data::Validator;
-
 sub build {
     my $class = shift;
-    my $args  = (@_ == 1 and ref($_[0]) eq 'HASH') ? +shift : +{ @_ };
+    my $args  = (@_ == 1 and ref($_[0]) and ref($_[0]) eq 'HASH') ? +shift : +{ @_ };
 
     my @queries;
-    {
-        local $Carp::CarpLevel = $Carp::CarpLevel + 1;
-        foreach my $key (sort keys %$args) {
-            push @queries => $class->_build($key => $args->{$key});
-        }
+    foreach my $key (sort keys %$args) {
+        push @queries => $class->_build($key => $args->{$key});
     }
 
     return join(' + ', @queries);
 }
 
 sub _build {
-    state $rule = Data::Validator->new(
-        column    => 'Str',
-        cond      => 'Defined',
-    )->with(qw/Method StrictSequenced/);
-    my($self, $args) = $rule->validate(@_);
+    my($class, $column, $cond) = @_;
 
-    my $column = $args->{column};
-    my $cond   = $args->{cond};
     my $query  = '';
     if (ref $cond) {
         if (ref $cond eq 'ARRAY') {
@@ -43,7 +31,7 @@ sub _build {
 
             foreach my $val (@vals) {
                 $query .= " $join " if $query;
-                $query .= $self->_build($column => $val);
+                $query .= $class->_build($column => $val);
             }
             $query = "(${query})";
         }
@@ -61,7 +49,7 @@ sub _build {
                     croak("unknown cond = ref($cond_rule)");
                 }
                 my $rule = $cond_rule_hash->{$cond_rule};
-                my $val  = _escape_value($cond->{$cond_rule});
+                my $val  = $class->_escape_value($cond->{$cond_rule});
                 $query = "${column}${rule}${val}";
                 last;
             }
@@ -71,7 +59,7 @@ sub _build {
         }
     }
     else {
-        $cond  = _escape_value($cond);
+        $cond  = $class->_escape_value($cond);
         $query = "${column}:${cond}";
     }
 
@@ -79,10 +67,8 @@ sub _build {
 }
 
 sub _escape_value {
-    state $rule = Data::Validator->new(
-        val  => 'Str',
-    )->with(qw/StrictSequenced/);
-    my $val = $rule->validate(@_)->{val};
+    my($class, $val) = @_;
+
     $val =~ s/(?<!\\)"/\\"/g;
     return qq{"${val}"};
 }
