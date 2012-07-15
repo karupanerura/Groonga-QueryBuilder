@@ -109,7 +109,67 @@ This document describes Groonga::QueryBuilder version 0.01.
 
 =head3 C<< build >>
 
-# TODO
+building query.
+
+=head4 Example
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => 'hoge',
+    ); # foo:"hoge"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => 'hoge',
+        bar => 'fuga',
+    ); # foo:"hoge" + bar:"fuga"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => {'>' => 1 },
+    ); # foo:>"1"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => {'<' => 3 },
+    ); # foo:<"3"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => {'>=' => 2 },
+    ); # foo:>="2"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => {'<=' => 4 },
+    ); # foo:<="4"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => {'!=' => 0 },
+    ); # foo:!"0"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => {-match => 'xxx' },
+    ); # foo:@"xxx"
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => [{-match => 'xxx' }, {-match => 'yyy' }],
+    ); # (foo:@"xxx" OR foo:@"yyy")
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => ['+' => {-match => 'xxx' }, {-match => 'yyy' }],
+    ); # (foo:@"xxx" + foo:@"yyy")
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => ['+' => {-match => 'xxx' }, {-match => 'yyy' }, {-mathc => 'zzz'}],
+    ); # (foo:@"xxx" + foo:@"yyy" + foo:@"zzz")
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => ['+' => {-match => 'xxx' }, [{-match => 'yyy' }, {-mathc => 'zzz'}]],
+    ); # (foo:@"xxx" + (foo:@"yyy" OR foo:@"zzz"))
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => ['+' => {-match => 'xxx' }, ['-' => {-match => 'yyy' }, {-mathc => 'zzz'}]],
+    ); # (foo:@"xxx" + (foo:@"yyy" - foo:@"zzz"))
+
+    my $query = Groonga::QueryBuilder->build(
+        foo => ['+' => {-match => 'xxx' }, ['-' => {-match => 'yyy' }, {-mathc => 'zzz'}]],
+        bar => 'fuga',
+    ); # (foo:@"xxx" + (foo:@"yyy" - foo:@"zzz")) + bar:"fuga"
 
 =head1 DEPENDENCIES
 
